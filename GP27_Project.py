@@ -13,8 +13,7 @@ Km = 9#cout de setup de la manufacture
 Hm = 3#cout de stockage produit manufacturé
 HR = 5#cout de stockage produit prêt a être remanufacturé
         
-class variable: #définir tous les éléments qu'on retrouve a chaque fois
-        
+class variable: #définir tous les éléments qu'on retrouve a chaque fois        
     def __init__(self): #on définit les éléments
         self.D=50
         self.R=10
@@ -25,6 +24,7 @@ class variable: #définir tous les éléments qu'on retrouve a chaque fois
         self.yM=[]
         self.GammaM=[]
         self.GammaT=[]
+        self.NR=[]
         
     def prod(self, xm,xr):
         self.xM=xm
@@ -49,10 +49,21 @@ def somme_dem(i,n):
     somme=0
     for k in range (n-i):
         somme+= classeur[k+i].D
+        
+def init_loi():
+    u=1
+    """générer aléatoire les données"""
     
 
 
 """Equations"""
+
+def equa_2(t):
+    classeur[t].yR=classeur[t-1].yR+classeur[t].R-classeur[t].xR
+    
+def equa_3(t):
+    classeur[t].yM=classeur[t-1].yM+classeur[t].xR+classeur[t].xM-classeur[t].D
+    
 def equa_11(t):
     somme = 0
     for i in range (t):
@@ -73,6 +84,8 @@ def equa_13(t):
         sommeX-=classeur[i+tau]-classeur[tau].xM
     classeur[t].xR=max(somme_dem(tau, t)-sommeX,0)
     classeur[t].xM=0
+    
+
  
 
     somme=0
@@ -91,9 +104,12 @@ def equa_13(t):
 #Demand()
 tau=1 #temporalité de la première simulation
 z= T
-"""Etape 1"""
-# equa_12(tau)
-# equa_13(tau)
+"""Etape 1 : find initial schedule"""
+for i in range (len(classeur)):
+    equa_11(i)
+equa_12(i)
+for i in range (len(classeur)):
+    equa_13(i)
 # equa_2 #check ses entrées
 # equa_3 #check ses entrées
 # C=c3(tau,z) #cout initial
