@@ -85,18 +85,10 @@ def equa_13(t):
     classeur[t].xR=max(somme_dem(tau, t)-sommeX,0)
     classeur[t].xM=0
     
+"""
+def equa_14():#cout total
 
- 
-
-    somme=0
-    for i in range (T+1):
-        somme += classeur[i].D
-    return somme
-
-"""   
-def equa_13(t):
-    classeur[t].xM=0"""
-    
+"""    
 # x=somme_dem()
 # print(x)
     
