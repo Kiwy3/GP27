@@ -4,6 +4,7 @@ Created on Tue Nov  9 13:55:33 2021
 @author: natha
 """
 
+import pandas as pd
 """Définir l'ensemble des données"""  
 
 T = 200 #définir l'horizon global
@@ -69,7 +70,8 @@ def equa_11(t):
     for i in range (t):
         somme += (classeur[i].D-classeur[i].R)
     return somme
-    somme -= classeur[0].yR  
+    somme -= classeur[0].yR
+    classeur[t].NR=somme
 
 def equa_12(t): 
     NRt=[]
@@ -81,7 +83,7 @@ def equa_12(t):
 def equa_13(t):
     sommeX =0
     for i in range (t-1-tau):
-        sommeX-=classeur[i+tau]-classeur[tau].xM
+        sommeX-=classeur[i+tau].xR-classeur[tau].xM
     classeur[t].xR=max(somme_dem(tau, t)-sommeX,0)
     classeur[t].xM=0
     
@@ -96,14 +98,18 @@ def equa_14():#cout total
 #Demand()
 tau=1 #temporalité de la première simulation
 z= T
+"""A FAIRE : remplir le classeur a t=0, tau-1"""
+
 """Etape 1 : find initial schedule"""
-for i in range (len(classeur)):
+for i in range (len(classeur)):#NRt pour tout le planning
     equa_11(i)
-equa_12(i)
-for i in range (len(classeur)):
+equa_12(i) #XR_tau a 0, et XM_tau selon max(D/NR)
+for i in range (len(classeur)): #Xmt=0, xrt>=0, selon demande....
     equa_13(i)
-# equa_2 #check ses entrées
-# equa_3 #check ses entrées
+for i in range(len(classeur)-1):
+    equa_2(i+1)
+for i in range(len(classeur)-1):
+    equa_3(i+1)
 # C=c3(tau,z) #cout initial
 
 """Etape 2"""
