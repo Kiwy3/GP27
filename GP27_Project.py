@@ -3,7 +3,6 @@
 Created on Tue Nov  9 13:55:33 2021
 @author: natha
 """
-
 import pandas as pd
 """Définir l'ensemble des données"""  
 
@@ -50,9 +49,20 @@ def somme_dem(i,n):
     somme=0
     for k in range (n-i):
         somme+= classeur[k+i].D
+    return somme
         
-def init_loi():
-    u=1
+# def init_loi():
+#     u=1
+    
+#def export():
+#     u=1
+    
+# def import_data():
+#     u=1
+
+def init_t0(t):
+    classeur[t-1].yR=0#t-1 car on se place avant tau
+    classeur[t-1].yM=0
     """générer aléatoire les données"""
     
 
@@ -98,6 +108,7 @@ def equa_14():#cout total
 #Demand()
 tau=1 #temporalité de la première simulation
 z= T
+init_t0(tau)
 """A FAIRE : remplir le classeur a t=0, tau-1"""
 
 """Etape 1 : find initial schedule"""
