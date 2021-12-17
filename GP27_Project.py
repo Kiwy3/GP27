@@ -16,15 +16,15 @@ HR = 5#cout de stockage produit prêt a être remanufacturé
 class variable: #définir tous les éléments qu'on retrouve a chaque fois        
     def __init__(self): #on définit les éléments
         self.D=50
-        self.R=10
-        self.t=[]
-        self.xR=[]
-        self.xM=[]
-        self.yR=[]
-        self.yM=[]
-        self.GammaM=[]
-        self.GammaT=[]
-        self.NR=[]
+        self.R=30
+        self.t=0
+        self.xR=0
+        self.xM=0
+        self.yR=0
+        self.yM=0
+        self.GammaM=0
+        self.GammaT=0
+        self.NR=0
         
     def prod(self, xm,xr):
         self.xM=xm
@@ -63,7 +63,12 @@ def somme_dem(i,n):
 def init_t0(t):
     classeur[t-1].yR=0#t-1 car on se place avant tau
     classeur[t-1].yM=0
-    """générer aléatoire les données"""
+    
+"""
+def search_l():
+    """
+    
+"""générer aléatoire les données"""
     
 
 
@@ -93,9 +98,13 @@ def equa_12(t):
 def equa_13(t):
     sommeX =0
     for i in range (t-1-tau):
-        sommeX-=classeur[i+tau].xR-classeur[tau].xM
-    classeur[t].xR=max(somme_dem(tau, t)-sommeX,0)
-    classeur[t].xM=0
+        sommeX+=classeur[i+tau].xR
+    classeur[t].xR=max(somme_dem(tau, t)-sommeX-classeur[tau].xM,0)
+    classeur[t].xM=1
+    
+""" def equa_14():
+    """
+
     
 """
 def equa_14():#cout total
@@ -109,7 +118,6 @@ def equa_14():#cout total
 tau=1 #temporalité de la première simulation
 z= T
 init_t0(tau)
-"""A FAIRE : remplir le classeur a t=0, tau-1"""
 
 """Etape 1 : find initial schedule"""
 for i in range (len(classeur)):#NRt pour tout le planning
@@ -124,15 +132,17 @@ for i in range(len(classeur)-1):
 # C=c3(tau,z) #cout initial
 
 """Etape 2"""
-"""
-for k in range (z-(tau-1)):
+
+for k in range (z-(tau-1)): 
     if classeur[k].xR>0 :
         classeur[tau].xM+= classeur[tau].xR
         classeur[k].xR=0
         for i in range (k-(tau-1)):
-            l=k-2 #faire une fonction search_l
-            #update xr(i) using equa_13
-            #update ym(t) et yr(t) avec equa_2 et equa_3
+            equa_13(i)
+            for t in range(len(classeur)):
+                equa_2(t)
+                equa_3(t)
+        """    
         #determine delta C1 avec C3()
         #reset initial schedule
         #Find period l (period of the last remanufacturing lot before period k)
