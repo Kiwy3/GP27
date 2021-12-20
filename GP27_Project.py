@@ -11,7 +11,7 @@ C=0 #variable du cout global
 Kr = 5 #cout de setup de la remanufacture
 Km = 9#cout de setup de la manufacture
 Hm = 3#cout de stockage produit manufacturé
-HR = 5#cout de stockage produit prêt a être remanufacturé
+Hr = 5#cout de stockage produit prêt a être remanufacturé
         
 class variable: #définir tous les éléments qu'on retrouve a chaque fois        
     def __init__(self): #on définit les éléments
@@ -23,7 +23,7 @@ class variable: #définir tous les éléments qu'on retrouve a chaque fois
         self.yR=0
         self.yM=0
         self.GammaM=0
-        self.GammaT=0
+        self.GammaR=0
         self.NR=0
         
     def prod(self, xm,xr):
@@ -64,10 +64,12 @@ def init_t0(t):
     classeur[t-1].yR=0#t-1 car on se place avant tau
     classeur[t-1].yM=0
     
-"""
-def search_l():
-    """
-    
+
+def search_l(k):
+    for i in range (k-tau):
+        if classeur[i+tau].xM>0:
+            point=classeur[i+tau].t
+    return point
 """générer aléatoire les données"""
     
 
@@ -102,14 +104,25 @@ def equa_13(t):
     classeur[t].xR=max(somme_dem(tau, t)-sommeX-classeur[tau].xM,0)
     classeur[t].xM=1
     
-""" def equa_14():
-    """
-
+def equa_14():
+    for i in range (len(classeur)):#Obtenir la variable binaire correspond a l'utilisation ou non
+        if classeur[i].xM>0:
+            classeur[i].GammaM=1
+        else :
+            classeur[i].GammaM=0
+        if classeur[i].xR>0:
+            classeur[i].GammaR=1
+        else :
+            classeur[i].GammaR=0
+    somme=0
+    somme+= Km
+    for i in range (z-tau):
+        somme += classeur[i].GammaR*Kr
+        somme += classeur[i].yM*Hm
+        somme += classeur[i].yR*Hr
+    somme=somme/(z-tau+1)
+    return somme
     
-"""
-def equa_14():#cout total
-
-"""    
 # x=somme_dem()
 # print(x)
     
@@ -129,10 +142,12 @@ for i in range(len(classeur)-1):
     equa_2(i+1)
 for i in range(len(classeur)-1):
     equa_3(i+1)
-# C=c3(tau,z) #cout initial
+Cini=equa_14()
 
+final=classeur
 """Etape 2"""
-
+DeltaCI=[]
+DeltaCII=[]
 for k in range (z-(tau-1)): 
     if classeur[k].xR>0 :
         classeur[tau].xM+= classeur[tau].xR
@@ -142,10 +157,10 @@ for k in range (z-(tau-1)):
             for t in range(len(classeur)):
                 equa_2(t)
                 equa_3(t)
-        """    
-        #determine delta C1 avec C3()
+        DeltaCI.append(equa_14()-Cini)
         #reset initial schedule
-        #Find period l (period of the last remanufacturing lot before period k)
+        l=search_l(k)
+           
         if classeur[l].yR>=classeur[k].xR:
             classeur[l].xR+=classeur[k].xR
             classeur[k].xR=0
@@ -153,9 +168,10 @@ for k in range (z-(tau-1)):
             classeur[tau].xM+=classeur[k].xR-classeur[l].yR
             classeur[l].xR+=classeur[l].yR
             classeur[k].xR=0
-        #update ym(t) et yr(t) avec 2 et 3
-        #determine delta C2"""
-#fin    
+        for t in range(len(classeur)):
+                equa_2(t)
+                equa_3(t)
+        DeltaCII.append(equa_14()-Cini)     
 
 """Etape 3"""
 """if min
