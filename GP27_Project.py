@@ -4,6 +4,7 @@ Created on Tue Nov  9 13:55:33 2021
 @author: natha
 """
 import pandas as pd
+import copy
 """Définir l'ensemble des données"""  
 
 T = 200 #définir l'horizon global
@@ -36,13 +37,7 @@ for i in range(T+1):
     classeur.append(variable())
     classeur[i].t=i#init la temporalité
 
-"""Faire des test de compréhension"""
-# for i in range (T+1) :
-#     print(i)
-#     classeur[i].t=i
-    
-# classeur[5].yM=3
-# print(classeur[18].yM)
+
 
 """Fonctions utiles"""
 def somme_dem(i,n):
@@ -51,15 +46,6 @@ def somme_dem(i,n):
         somme+= classeur[k+i].D
     return somme
         
-# def init_loi():
-#     u=1
-    
-#def export():
-#     u=1
-    
-# def import_data():
-#     u=1
-
 def init_t0(t):
     classeur[t-1].yR=0#t-1 car on se place avant tau
     classeur[t-1].yM=0
@@ -70,6 +56,32 @@ def search_l(k):
         if classeur[i+tau].xM>0:
             point=classeur[i+tau].t
     return point
+
+def final_export():
+    list_xR=[]
+    list_xM=[]
+    list_yM=[]
+    list_yR=[]
+    for i in range(len(classeur)):
+        list_xR.append(classeur[i].xR)
+        list_xM.append(classeur[i].xM)
+        list_yR.append(classeur[i].yR)
+        list_yM.append(classeur[i].yM)
+
+    # listA=['Cout final (par période','nb d itération']
+    # listB=[min(min1,min2),count]
+
+    data={
+        'prod remanufacture':list_xR,
+        'stock recouverable':list_yR,
+        'prod manufacture': list_xM,
+        'stock vendable' : list_yM,
+        # 'données':listA,
+        # 'valeur' :listB
+        }
+    df=pd.DataFrame(data)
+    df.to_csv (r'D:\Nathan\Documents\Git\GP27-project\test_export.csv', index = False, header=True)
+    
 """générer aléatoire les données"""
     
 
@@ -144,38 +156,57 @@ for i in range(len(classeur)-1):
     equa_3(i+1)
 Cini=equa_14()
 
-final=classeur
+Init=copy.deepcopy(classeur)
 """Etape 2"""
-DeltaCI=[]
-DeltaCII=[]
-for k in range (z-(tau-1)): 
-    if classeur[k].xR>0 :
-        classeur[tau].xM+= classeur[tau].xR
-        classeur[k].xR=0
-        for i in range (k-(tau-1)):
-            equa_13(i)
+opport1=[]
+opport2=[]
+condi=0
+count=0
+while condi==0:
+    DeltaCI=[]
+    DeltaCII=[]
+    for k in range (z-(tau-1)): 
+        if classeur[k].xR>0 :
+            classeur[tau].xM+= classeur[tau].xR
+            classeur[k].xR=0
+            for i in range (k-(tau-1)):
+                equa_13(i)
+                for t in range(len(classeur)):
+                    equa_2(t)
+                    equa_3(t)
+            DeltaCI.append(equa_14()-Cini)
+            opport1.append(copy.deepcopy(classeur))
+            #reset initial schedule
+            l=search_l(k)
+               
+            if classeur[l].yR>=classeur[k].xR:
+                classeur[l].xR+=classeur[k].xR
+                classeur[k].xR=0
+            else :
+                classeur[tau].xM+=classeur[k].xR-classeur[l].yR
+                classeur[l].xR+=classeur[l].yR
+                classeur[k].xR=0
             for t in range(len(classeur)):
-                equa_2(t)
-                equa_3(t)
-        DeltaCI.append(equa_14()-Cini)
-        #reset initial schedule
-        l=search_l(k)
-           
-        if classeur[l].yR>=classeur[k].xR:
-            classeur[l].xR+=classeur[k].xR
-            classeur[k].xR=0
-        else :
-            classeur[tau].xM+=classeur[k].xR-classeur[l].yR
-            classeur[l].xR+=classeur[l].yR
-            classeur[k].xR=0
-        for t in range(len(classeur)):
-                equa_2(t)
-                equa_3(t)
-        DeltaCII.append(equa_14()-Cini)     
+                    equa_2(t)
+                    equa_3(t)
+            DeltaCII.append(equa_14()-Cini) 
+            opport2.append(copy.deepcopy(classeur))
+            """Etape 3"""   
+    for i in range(z-(tau-1)):
+        min1=min(DeltaCI)
+        min2=min(DeltaCII)        
+        if (min(min1,min2)<0):
+            if min1<min2:
+                indice=DeltaCI.index(min1)
+                classeur=copy.deepcopy(opport1[indice])
+            else:
+                indice=DeltaCII.index(min2)
+                classeur=copy.deepcopy(opport2[indice])
+            Cini+=min(min1,min2)
 
-"""Etape 3"""
-"""if min
-implement the best schedule
-Cini=Cini + min
-go to step 2
-end if"""
+        else:
+            condi=1
+    count+=1
+
+    
+final_export()
