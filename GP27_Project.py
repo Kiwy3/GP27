@@ -165,7 +165,7 @@ while condi==0:#Boucle tant que l'heuristique progresse
     DeltaCII=[]#liste pour stocker les écart de cout avec la version 1    
     for k in range (z-(tau-1)): 
         if classeur[k].xR>0 :
-            classeur[tau].xM+= classeur[tau].xR #début de la version 1
+            classeur[tau].xM+= classeur[k].xR #début de la version 1
             classeur[k].xR=0
             for i in range (k-(tau-1)):
                 equa_13(i)
