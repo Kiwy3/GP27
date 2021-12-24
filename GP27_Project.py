@@ -6,6 +6,9 @@ Created on Tue Nov  9 13:55:33 2021
 """Librairies"""
 import pandas as pd #Pour faire l'export csv à la fin
 import copy #pour faire des copies profondes
+import pdoc
+
+
 
 """Données de l'énoncé"""  
 T = 200 #définir l'horizon global
@@ -21,7 +24,7 @@ class variable: #définir tous les éléments qu'on retrouve a chaque fois
         self.D=50
         self.R=30
         self.t=0
-        self.xR=0
+        self.xR=1
         self.xM=0
         self.yR=0
         self.yM=0
@@ -52,6 +55,7 @@ def init_t0():#remplis les données avant tau, à t=0
     classeur[tau-1].yM=0
     
 def search_l(k):#dans le pseudo code, cherche la dernière période de manufacturing avant la période k
+    point=tau
     for i in range (k-tau):
         if classeur[i+tau].xM>0:
             point=classeur[i+tau].t
@@ -102,7 +106,7 @@ def equa_12(): #equation 12, pour trouver la production à tau
     for i in range (T+1-tau):
         NRt.append(equa_11(i+tau))
     max_NRt= max(NRt)
-    classeur[t].prod(max(classeur[t].D,max_NRt),0)
+    classeur[tau].prod(max(classeur[tau].D,max_NRt),0)
     
 def equa_13(t):#pour trouver la production sur le reste de l'horizon
     sommeX =0
@@ -158,11 +162,10 @@ while condi==0:#Boucle tant que l'heuristique progresse
     Backup=copy.deepcopy(classeur)#un back up pour que les 2 versions travaillent avec les mêmes données
     count+=1
     DeltaCI=[]#liste pour stocker les écart de cout avec la version 1
-    DeltaCII=[]#liste pour stocker les écart de cout avec la version 1
-    
-    for k in range (z-(tau-1)): #début de la version 1
+    DeltaCII=[]#liste pour stocker les écart de cout avec la version 1    
+    for k in range (z-(tau-1)): 
         if classeur[k].xR>0 :
-            classeur[tau].xM+= classeur[tau].xR
+            classeur[tau].xM+= classeur[tau].xR #début de la version 1
             classeur[k].xR=0
             for i in range (k-(tau-1)):
                 equa_13(i)
@@ -189,20 +192,19 @@ while condi==0:#Boucle tant que l'heuristique progresse
             opport2.append(copy.deepcopy(classeur))#fin de la version 2
             
             """Etape 3"""   
-    for i in range(z-(tau-1)):#trouver le minimum
-        min1=min(DeltaCI)
-        min2=min(DeltaCII)        
-        if (min(min1,min2)<0):#le minimum <0 veut dire que l'heuristique a amélioré, elle peut donc encore aller plus loin
-            if min1<min2:#la version 1 avec un cout plus petit
-                indice=DeltaCI.index(min1)
-                classeur=copy.deepcopy(opport1[indice])
-            else:
-                indice=DeltaCII.index(min2)
-                classeur=copy.deepcopy(opport2[indice])
-            Cini+=min(min1,min2)#le Cini, soit le cout minimum de référence va décendre, pour éviter de boucler à l'infini
-
+    min1=min(DeltaCI)
+    min2=min(DeltaCII)        
+    if (min(min1,min2)<0):#le minimum <0 veut dire que l'heuristique a amélioré, elle peut donc encore aller plus loin
+        if min1<min2:#la version 1 avec un cout plus petit
+            indice=DeltaCI.index(min1)
+            classeur=copy.deepcopy(opport1[indice])
         else:
-            condi=1#pour sortir de la boucle une fois qu'on ne permet plus d'avancer
+            indice=DeltaCII.index(min2)
+            classeur=copy.deepcopy(opport2[indice])
+        Cini+=min(min1,min2)#le Cini, soit le cout minimum de référence va décendre, pour éviter de boucler à l'infini
+
+    else:
+        condi=1#pour sortir de la boucle une fois qu'on ne permet plus d'avancer
 
     
 final_export()#sortir les données du plan optimal en csv, pour pouvoir l'exploiter sur excel, plus utilisable
